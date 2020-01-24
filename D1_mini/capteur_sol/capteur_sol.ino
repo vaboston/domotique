@@ -1,12 +1,8 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
-#define durationSleep 10 // secondes
-int PinSensor = A0;
-
-int ValeurSensor = 0;
-int pourcentage = 0;
-#define durationSleep 10 // secondes
 #include <InfluxDb.h>
+
+#define durationSleep 10 // secondes
 #define INFLUXDB_HOST ""
 #define INFLUXDB_PORT 80
   //if used with authentication
@@ -14,15 +10,25 @@ int pourcentage = 0;
 #define INFLUXDB_PASS ""
 #define INFLUXDB_DATABASE ""
 
+int PinSensor = A0;
+// A0 d1mini => A0 hygrometrie sensor
+// +3.3 d1mini => VCC hygrometrie sensor
+// GND d1mini => GND hygrometrie sensor
+int ValeurSensor = 0;
+int pourcentage = 0;
 
-Influxdb influx(INFLUXDB_HOST, INFLUXDB_PORT);
+
+
 
 const char* ssid = "";
 const char* password = "";
 
 // Create an instance of the server
 // specify the port to listen on as an argument
-   ESP8266WiFiMulti WiFiMulti;
+ESP8266WiFiMulti WiFiMulti;
+Influxdb influx(INFLUXDB_HOST, INFLUXDB_PORT);
+
+
 void setup(){
  Serial.begin(9600);
  delay(30);
@@ -43,10 +49,7 @@ void setup(){
   Serial.println("WiFi connected");
  
   influx.setDb(INFLUXDB_DATABASE);
-
-
-   influx.setDbAuth(INFLUXDB_DATABASE, INFLUXDB_USER, INFLUXDB_PASS); // with authentication
-
+  influx.setDbAuth(INFLUXDB_DATABASE, INFLUXDB_USER, INFLUXDB_PASS); // with authentication
 
 
   // Print the IP address
@@ -58,7 +61,6 @@ void loop(){
  ValeurSensor = analogRead(PinSensor);
  pourcentage = ConvertEnPercent(ValeurSensor);
  AfficheValeurEtPourcentage();
-   int pressure=(bme.readPressure()/100);
    InfluxData row("serre_hygro");
    row.addTag("device", "alpha");
    row.addTag("sensor", "%");
@@ -80,6 +82,4 @@ void AfficheValeurEtPourcentage(){
  Serial.print(pourcentage);
  Serial.println("%");
  Serial.println("-----------");
-
- }
 }
